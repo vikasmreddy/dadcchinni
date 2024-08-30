@@ -1,0 +1,9 @@
+asmack.wav filter=lfs diff=lfs merge=lfs -text
+ksmack.wav filter=lfs diff=lfs merge=lfs -text
+rrsmack.wav filter=lfs diff=lfs merge=lfs -text
+rzsmack.wav filter=lfs diff=lfs merge=lfs -text
+shredder.png filter=lfs diff=lfs merge=lfs -text
+8-bit_retro_character_of_a_zucchini_with_bear_14a52513-9ba4-46e8-a20d-8e901d87b970.png filter=lfs diff=lfs merge=lfs -text
+dude-bigger.png filter=lfs diff=lfs merge=lfs -text
+dude.png filter=lfs diff=lfs merge=lfs -text
+flag.png filter=lfs diff=lfs merge=lfs -text
