@@ -9,6 +9,7 @@ commands = ["bash download-lfs.sh"]
 [deployment]
 deploymentTarget = "static"
 publicDir = "/"
+build = ["sh", "-c", "bash download-lfs.sh"]
 
 [[deployment.static]]
 buildCommand = ""
