@@ -1,0 +1,15 @@
+modules = ["nodejs-20", "bash", "web"]
+
+[nix]
+channel = "stable-24_05"
+
+[[deployment.pre-build]]
+commands = ["bash download-lfs.sh"]
+
+[deployment]
+deploymentTarget = "static"
+publicDir = "/"
+
+[[deployment.static]]
+buildCommand = ""
+publicDir = "./"
