@@ -1,20 +1,26 @@
 const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {
-      default: 'arcade',
-      arcade: {
-        gravity: { y: 300 },
-        debug: false
-      }
-    },
-    scene: {
-      preload: preload,
-      create: create,
-      update: update
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  parent: 'game-container',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    orientation: Phaser.Scale.LANDSCAPE
+  },
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 300 },
+      debug: false
     }
-  };
+  },
+  scene: {
+    preload: preload,
+    create: create,
+    update: update
+  }
+};
   
   const game = new Phaser.Game(config);
   let player;
@@ -36,6 +42,10 @@ const config = {
   let totalKids = 7; // Since we create 7 kids in the current setup
   let collectedKids = 0;
   
+  let dpad;
+  let jumpButton;
+  let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
   function preload() {
 
     this.load.image('sky', 'https://labs.phaser.io/assets/skies/space3.png');
@@ -51,6 +61,15 @@ const config = {
   }
   
   function create() {
+    handleOrientation();
+    if (isMobile) {
+      window.addEventListener('orientationchange', handleOrientation);
+      initMobileControls();
+    } else {
+      document.getElementById('controls').style.display = 'none';
+      document.getElementById('jump-button').style.display = 'none';
+    }
+    
     // Adding background
     this.add.tileSprite(0, 0, worldWidth, 600, 'sky').setOrigin(0, 0);
     
@@ -182,25 +201,27 @@ const config = {
   }
   
   function update() {
-    if (cursors.left.isDown) {
-      player.setVelocityX(-160);
-      player.anims.play('left', true);
-    } else if (cursors.right.isDown) {
-      player.setVelocityX(160);
-      player.anims.play('right', true);
-    } else {
-      player.setVelocityX(0);
-      player.anims.play('turn');
+    if (!isMobile) {
+      if (cursors.left.isDown) {
+        player.setVelocityX(-160);
+        player.anims.play('left', true);
+      } else if (cursors.right.isDown) {
+        player.setVelocityX(160);
+        player.anims.play('right', true);
+      } else {
+        player.setVelocityX(0);
+        player.anims.play('turn');
+      }
+
+      if (Phaser.Input.Keyboard.JustDown(cursors.up)) {
+        jump();
+      }
     }
   
     if (player.body.touching.down) {
       canDoubleJump = false;
       canTripleJump = false;
       jumpCount = 0;
-    }
-
-    if (Phaser.Input.Keyboard.JustDown(cursors.up)) {
-      jump();
     }
 
     // Make kids jump
@@ -304,4 +325,62 @@ const config = {
     collectedKids = 0;
     currentKidSoundIndex = 0;
     this.scene.restart();
+  }
+
+  function handleOrientation() {
+    if (isMobile) {
+      if (window.orientation === undefined || window.orientation === 90 || window.orientation === -90) {
+        document.getElementById('game-container').style.display = 'block';
+        document.getElementById('controls').style.display = 'block';
+        document.getElementById('jump-button').style.display = 'flex';
+      } else {
+        document.getElementById('game-container').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('jump-button').style.display = 'none';
+        alert('Please rotate your device to landscape mode');
+      }
+    } else {
+      document.getElementById('controls').style.display = 'none';
+      document.getElementById('jump-button').style.display = 'none';
+    }
+  }
+
+  function initMobileControls() {
+    dpad = document.getElementById('dpad');
+    jumpButton = document.getElementById('jump-button');
+
+    let isDragging = false;
+    let startX;
+
+    dpad.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX;
+    });
+
+    dpad.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        const deltaX = e.touches[0].clientX - startX;
+        if (deltaX < 0) {
+          player.setVelocityX(-160);
+          player.anims.play('left', true);
+        } else if (deltaX > 0) {
+          player.setVelocityX(160);
+          player.anims.play('right', true);
+        }
+      }
+    });
+
+    dpad.addEventListener('touchend', () => {
+      isDragging = false;
+      player.setVelocityX(0);
+      player.anims.play('turn');
+    });
+
+    jumpButton.addEventListener('touchstart', () => {
+      jump();
+    });
+
+    jumpButton.addEventListener('touchend', (e) => {
+      e.preventDefault();
+    });
   }
